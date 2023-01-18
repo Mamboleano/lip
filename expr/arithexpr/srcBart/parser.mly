@@ -22,8 +22,7 @@ open Ast
 %left OR
 %left AND
 %left NOT
-
-%right SUCC PRED ISZERO
+%nonassoc SUCC, PRED, ISZERO
 
 %start <expr> prog
 
@@ -36,13 +35,13 @@ prog:
 expr:
   | TRUE { True }
   | FALSE { False }
-  | ZERO { Zero }
   | NOT; e=expr { Not(e) }
   | e1=expr; AND; e2=expr { And(e1,e2) }
   | e1=expr; OR; e2=expr { Or(e1,e2) }
-  | SUCC; e = expr; { Succ(e) }
-  | PRED; e = expr; { Pred(e) }
-  | ISZERO; e = expr; {IsZero(e) }
   | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr; { If(e1, e2, e3) }
+  | ZERO { Zero }
+  | SUCC; e = expr { Succ(e) }
+  | PRED; e = expr { Pred(e) }
+  | ISZERO; e = expr { IsZero(e) }
   | LPAREN; e=expr; RPAREN {e}
 ;
