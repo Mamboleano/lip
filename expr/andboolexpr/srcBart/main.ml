@@ -14,6 +14,7 @@ let parse (s : string) : boolExpr =
   let ast = Parser.prog Lexer.read lexbuf in
   ast
 
+(*provaa*)
 (******************************************************************************)
 (*                            Small-step semantics                            *)
 (******************************************************************************)
@@ -26,13 +27,13 @@ let rec trace1 = function
   | If(e0,e1,e2) -> let e0' = trace1 e0 in If(e0',e1,e2)
   | Not(True) -> False
   | Not(False) -> True
-  | Not(e) -> Not(trace1 e)
-  | And(True, e) -> e
-  | And(False, _) -> False
-  | And(e1, e2) -> let e' = trace1 e1 in And(e', e2)
-  | Or(True, _) -> True
-  | Or(False, e) -> e
-  | Or(e1, e2) -> let e' = trace1 e1 in Or(e', e2) 
+  | Not(e) -> let e' = trace1 e in Not(e')
+  | And(True,e) -> e
+  | And(False,_) -> False
+  | And(e1,e2) -> let e1' = trace1 e1 in And(e1',e2)
+  | Or(True,_) -> True
+  | Or(False,e) -> e
+  | Or(e1,e2) -> let e1' = trace1 e1 in Or(e1',e2)    
   | _ -> raise NoRuleApplies
 
 let rec trace e = try
@@ -51,23 +52,9 @@ let string_of_val = function
 
 let rec eval = function
     True -> true
-
   | False -> false
-
-  | Not(e) -> 
-      let b = eval e in
-      not b
-
-  | And(e1 ,e2) ->
-      let b1 = eval e1 in 
-      let b2 = eval e2 in 
-      (b1 && b2)
-
-  | Or(e1, e2) -> 
-      let b1 = eval e1 in 
-      let b2 = eval e2 in
-      (b1 || b2) 
-
-
+  | Not(e) -> not (eval e)
+  | And(e1,e2) -> eval e1 && eval e2
+  | Or(e1,e2) -> eval e1 || eval e2
   | If(e0,e1,e2) -> if eval e0 then eval e1 else eval e2
 ;;
