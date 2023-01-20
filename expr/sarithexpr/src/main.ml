@@ -1,6 +1,7 @@
 open Ast
 
 type exprtype = BoolT | NatT;;
+type exprval  = Bool of bool | Nat of int ;;
 
 let string_of_val = function
     Bool b -> if b then "true" else "false"
