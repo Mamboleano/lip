@@ -2,8 +2,6 @@ open Ast
 
 type exprtype = BoolT | NatT;;
 
-type exprval = Bool of bool | Nat of int
-
 let string_of_val = function
     Bool b -> if b then "true" else "false"
   | Nat n -> string_of_int n
@@ -37,32 +35,49 @@ let parse (s : string) : expr =
 (******************************************************************************)
 
 exception TypeError of string;;
-
 let rec typecheck = function
-    True -> BoolT
+  | True -> BoolT
   | False -> BoolT
-  | Not(e) -> (match typecheck e with
-        BoolT -> BoolT
-      | NatT -> raise (TypeError (string_of_expr e ^ " has type Nat, but type Bool was expected")))
-  | And(e1,e2) | Or(e1,e2) ->
-    (match (typecheck e1,typecheck e2) with
-       (BoolT,BoolT) -> BoolT
-     | (NatT,_) -> raise (TypeError (string_of_expr e1 ^ " has type Nat, but type Bool was expected"))
-     | (_,NatT) -> raise (TypeError (string_of_expr e2 ^ " has type Nat, but type Bool was expected")))
-  | If(e0,e1,e2) -> (match (typecheck e0,typecheck e1,typecheck e2) with
-        (NatT,_,_) -> raise (TypeError (string_of_expr e0 ^ " has type Nat, but type Bool was expected"))
-      | (BoolT,t1,t2) when t1=t2 -> t1
-      | (BoolT,t1,t2) -> raise (TypeError (string_of_expr e2 ^ " has type " ^ string_of_type t2 ^ ", but type " ^ string_of_type t1 ^ " was expected"))
-)
   | Zero -> NatT
-  | Succ(e) | Pred(e) ->
-    (match typecheck e with
-       NatT -> NatT
-     | BoolT -> raise (TypeError (string_of_expr e ^ " has type Bool, but type Nat was expected")))
+
+  | Not(e) -> (match typecheck e with
+    | BoolT -> BoolT
+    | NatT -> raise (TypeError ((string_of_expr e) ^ " has type Nat, but type Bool was expected"))
+  )
+
+  | And(e1, e2) -> (match (typecheck e1), (typecheck e2) with
+    | BoolT, BoolT -> BoolT
+    | NatT, _ -> raise (TypeError ((string_of_expr e1) ^ " has type Nat, but type Bool was expected"))
+    | _, NatT -> raise (TypeError ((string_of_expr e2) ^ " has type Nat, but type Bool was expected"))
+  )
+
+  | Or(e1, e2) -> (match (typecheck e1), (typecheck e2) with
+    | BoolT, BoolT -> BoolT
+    | NatT, _ -> raise (TypeError ((string_of_expr e1) ^ " has type Nat, but type Bool was expected"))
+    | _, NatT -> raise (TypeError ((string_of_expr e2) ^ " has type Nat, but type Bool was expected"))
+)
+
+  | If(e0,e1, e2) -> (match (typecheck e0), (typecheck e1), (typecheck e2) with
+    | BoolT, t1, t2 when t1 = t2 -> t1
+    | NatT,_, _-> raise (TypeError ((string_of_expr e0) ^ " has type Nat, but type Bool was expected"))
+    | BoolT, t1, t2 -> raise (TypeError ((string_of_expr e2) ^ " has type " ^ string_of_type t2 ^ ", but type" ^ string_of_type t1 ^ "was expected"))
+)
+
+  | Succ(e) -> (match typecheck e with
+    | NatT -> NatT
+    | BoolT -> raise (TypeError ((string_of_expr e) ^ " has type Bool, but type Nat was expected"))
+)
+
+  | Pred(e) -> (match typecheck e with
+    | NatT -> NatT
+    | BoolT -> raise (TypeError ((string_of_expr e) ^ " has type Bool, but type Nat was expected"))
+  )
+
   | IsZero(e) -> (match typecheck e with
-       NatT -> BoolT
-     | BoolT -> raise (TypeError (string_of_expr e ^ " has type Bool, but type Nat was expected")))
-;;
+    | NatT -> BoolT
+    | BoolT -> raise (TypeError ((string_of_expr e) ^ " has type Bool, but type Nat was expected"))
+)
+
 
 (******************************************************************************)
 (*                            Small-step semantics                            *)
