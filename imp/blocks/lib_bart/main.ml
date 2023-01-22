@@ -61,7 +61,7 @@ exception NoRuleApplies
   
 let botenv = fun x -> failwith ("variable " ^ x ^ " unbound")
 let botmem = fun l -> failwith ("location " ^ string_of_int l ^ " undefined")
-    
+
 let bind f x v = fun y -> if y=x then v else f y
 
 let rec sem_decl (e,l) = function
