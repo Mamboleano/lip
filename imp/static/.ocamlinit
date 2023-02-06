@@ -1,0 +1,50 @@
+open StaticLib.Ast;;
+open StaticLib.Main;;
+open StaticLib.Prettyprint;;
+open StaticLib.Types;;
+
+let p1 = "int z;
+fun f(x) {z:=x+1; return 2}
+f(2);"
+
+let p2 = "int x;
+fun f(w) {x:=w+1; return 0}
+int y;
+fun g(z) {y:=2*x; z:=y+1; return z}
+x:=1;
+f(g(4));"
+
+let p3 = "{
+  int y;
+  y:=0;
+  {
+    int x;
+    fun pippo(n) {
+      x := n+1;
+      y := n+2;
+      return 0
+    }
+    x:=0;
+
+      {
+        int x;
+        x:=1;
+        pippo(2);
+      }
+  }
+}";;
+
+let p4 = "int n;
+fun f(x) {return n+x}
+fun g(n) {return f(n)}
+n:=1;
+g(10);"
+
+let p5 = "int x;
+int r;
+fun f(n) { if n=0 then r:=1; else r:=n*f(n-1); return r }
+x := f(5);";;
+
+let test_trace s =
+  let ps = parse s in
+  print_string (string_of_trace (vars_of_prog ps) (trace 100 ps));;

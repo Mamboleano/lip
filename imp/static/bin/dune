@@ -1,0 +1,4 @@
+(executable
+ (public_name static)
+ (name main)
+ (libraries staticLib))
